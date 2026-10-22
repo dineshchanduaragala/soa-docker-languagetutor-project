@@ -1,0 +1,82 @@
+# ==========================================
+# Root .gitignore for LanguageTutor Project
+# ==========================================
+
+# Compiled class & package files
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# Build output
+target/
+build/
+dist/
+dist-ssr/
+.vite/
+out/
+
+# Node dependencies & package manager logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment and local configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Log files and directories
+*.log
+logs/
+
+# Eclipse IDE
+.metadata/
+.settings/
+.project
+.classpath
+.apt_generated/
+.factorypath
+.springBeans
+.sts4-cache/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+# Maven wrapper jar
+.mvn/wrapper/maven-wrapper.jar
+
+# Operating System specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/

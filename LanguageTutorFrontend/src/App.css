@@ -1,0 +1,206 @@
+.app-main {
+  min-height: calc(100vh - 154px);
+}
+
+.app-footer {
+  padding: 1.25rem 0;
+  color: #73807b;
+  font-size: 0.875rem;
+  border-top: 1px solid #e5ebe7;
+}
+
+.eyebrow {
+  color: #167d62;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-title {
+  color: #18352d;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
+.page-description {
+  color: #73807b;
+  max-width: 38rem;
+}
+
+.brand-mark {
+  display: inline-grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border-radius: 0.7rem;
+  color: white;
+  background: #168367;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.navbar-brand {
+  color: #18352d;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.navbar-brand:hover {
+  color: #126b54;
+}
+
+.nav-link {
+  color: #65736d;
+  font-weight: 600;
+}
+
+.nav-link.active {
+  color: #14795f;
+}
+
+.surface-card,
+.stat-card {
+  border: 1px solid #e5ebe7;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(24 53 45 / 5%);
+}
+
+.stat-card {
+  height: 100%;
+  padding: 1.5rem;
+}
+
+.stat-label {
+  color: #73807b;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  margin: 0.65rem 0 0;
+  color: #18352d;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 0.85rem;
+  color: #14795f;
+  background: #e7f5ef;
+  font-size: 1.25rem;
+}
+
+.stat-icon.unavailable {
+  color: #9c6322;
+  background: #fff2dc;
+}
+
+.form-card {
+  max-width: 48rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.form-label {
+  color: #334a42;
+  font-weight: 600;
+}
+
+.form-control,
+.form-select {
+  min-height: 3rem;
+  border-color: #dce5df;
+  border-radius: 0.65rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #168367;
+  box-shadow: 0 0 0 0.2rem rgb(22 131 103 / 14%);
+}
+
+.btn-primary {
+  --bs-btn-bg: #168367;
+  --bs-btn-border-color: #168367;
+  --bs-btn-hover-bg: #126b54;
+  --bs-btn-hover-border-color: #126b54;
+  --bs-btn-active-bg: #105a47;
+  --bs-btn-active-border-color: #105a47;
+}
+
+.table > :not(caption) > * > * {
+  padding: 1rem;
+}
+
+.table thead th {
+  color: #73807b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 3.5rem 1rem;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  color: #14664f;
+  background: #e7f5ef;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-badge::before {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.status-badge.unavailable {
+  color: #8c6029;
+  background: #fff2dc;
+}
+
+.spinner-border {
+  color: #168367;
+}
+
+.alert {
+  border: 0;
+  border-radius: 0.75rem;
+}
+
+.delete-dialog-backdrop {
+  position: fixed;
+  z-index: 1055;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 31 26 / 48%);
+}
+
+.delete-dialog {
+  width: min(100%, 27rem);
+  padding: 1.75rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 20%);
+}
