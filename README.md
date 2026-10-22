@@ -17,6 +17,7 @@ A full-stack, enterprise-grade web application for managing language tutors, con
   - [1. Database Setup](#1-database-setup)
   - [2. Running the Backend](#2-running-the-backend)
   - [3. Running the Frontend](#3-running-the-frontend)
+- [Run with Docker Compose](#run-with-docker-compose)
 - [Verification & Testing Checklist](#verification--testing-checklist)
 - [Git & Ignore Policies](#git--ignore-policies)
 
@@ -316,6 +317,28 @@ Open [http://localhost:5173/](http://localhost:5173/) in your web browser.
 
 ---
 
+## Run with Docker Compose
+
+Install Docker Desktop (or Docker Engine with the Compose plugin), then run these commands from the project root:
+
+```bash
+docker compose up --build
+```
+
+Compose builds the frontend and backend images, starts MySQL with a persistent `mysql_data` volume, and waits for MySQL to become healthy before starting the backend. Open the app at [http://localhost](http://localhost). The frontend proxies `/api` requests to the backend; the backend is also available directly at `http://localhost:8080`.
+
+The Compose file includes development-only database credential defaults. Override them with environment variables before deployment, for example:
+
+```powershell
+$env:MYSQL_PASSWORD = "your-local-password"
+$env:MYSQL_ROOT_PASSWORD = "your-local-root-password"
+docker compose up --build
+```
+
+To stop the services while keeping database data, run `docker compose down`. To also delete the database volume, run `docker compose down --volumes`.
+
+---
+
 ## ✅ Verification & Testing Checklist
 
 | Step | Verification Task | Result |
@@ -332,7 +355,7 @@ Open [http://localhost:5173/](http://localhost:5173/) in your web browser.
 
 ## 🔒 Git & Ignore Policies
 
-- All deployment Docker files (`Dockerfile`, `docker-compose.yml`) have been removed from the repository per local verification phase instructions.
+- Dockerfiles and `.dockerignore` files are maintained for both application services, with `docker-compose.yml` at the project root.
 - A comprehensive root `.gitignore` is provided to ignore:
   - IDE metadata (`.metadata/`, `.settings/`, `.project`, `.classpath`, `.idea/`, `.vscode/`)
   - Build targets (`target/`, `dist/`, `build/`)
