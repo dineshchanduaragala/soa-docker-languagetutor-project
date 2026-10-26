@@ -1,43 +1,56 @@
-
-name: Docker Image CI
+name: Docker Fullstack LanguageTutor
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout source code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        if: github.event_name != 'pull_request'
+      - name: Check Docker Hub credentials
+        id: docker-auth
+        env:
+          LANGUAGETUTOR_USERNAME: ${{ secrets.LANGUAGETUTOR_USERNAME }}
+          LANGUAGETUTOR_TOKEN: ${{ secrets.LANGUAGETUTOR_TOKEN }}
+        run: |
+          if [[ -n "$LANGUAGETUTOR_USERNAME" && -n "$LANGUAGETUTOR_TOKEN" && "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to Docker Hub
+        if: steps.docker-auth.outputs.enabled == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.LANGUAGETUTOR_USERNAME }}
           password: ${{ secrets.LANGUAGETUTOR_TOKEN }}
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./LanguageTutorFrontend
-          file: ./LanguageTutorFrontend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ secrets.LANGUAGETUTOR_USERNAME }}/docker-frontend-languagetutor:latest
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
           context: ./LanguageTutorBackend
           file: ./LanguageTutorBackend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ secrets.LANGUAGETUTOR_USERNAME }}/docker-backend-languagetutor:latest
+          push: ${{ steps.docker-auth.outputs.enabled == 'true' }}
+          tags: ${{ secrets.LANGUAGETUTOR_USERNAME != '' && format('{0}/docker-backend-2400030518:latest', secrets.LANGUAGETUTOR_USERNAME) || 'languagetutor/docker-backend-2400030518:ci' }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./LanguageTutorFrontend
+          file: ./LanguageTutorFrontend/Dockerfile
+          push: ${{ steps.docker-auth.outputs.enabled == 'true' }}
+          tags: ${{ secrets.LANGUAGETUTOR_USERNAME != '' && format('{0}/docker-frontend-2400030518:latest', secrets.LANGUAGETUTOR_USERNAME) || 'languagetutor/docker-frontend-2400030518:ci' }}

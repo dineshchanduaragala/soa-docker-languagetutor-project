@@ -1,4 +1,11 @@
-target
-.git
-.idea
+target/
+.git/
+.idea/
 *.iml
+.classpath
+.project
+.settings/
+.metadata/
+*.log
+.env
+.env.*

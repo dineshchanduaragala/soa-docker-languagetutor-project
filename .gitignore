@@ -27,11 +27,7 @@ lerna-debug.log*
 
 # Environment and local configurations
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.*.local
+.env.*
 
 # Log files and directories
 *.log

@@ -1,17 +1,24 @@
-FROM maven:3.9-eclipse-temurin-21 AS build
+# Stage 1: Build the app
+FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /app
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
+
+COPY mvnw .
+COPY .mvn/ .mvn
+COPY pom.xml ./
 COPY src ./src
-RUN mvn -B package -DskipTests
 
-FROM eclipse-temurin:21-jre
+# Give execute permission for mvnw
+RUN chmod +x mvnw
 
-RUN groupadd --system spring && useradd --system --gid spring spring
+RUN ./mvnw clean package -DskipTests
+
+# Stage 2: Run the app
+FROM eclipse-temurin:21-jdk
+
 WORKDIR /app
-COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
-USER spring
+COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

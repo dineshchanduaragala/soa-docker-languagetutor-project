@@ -1,4 +1,4 @@
-package com.klef.soa.docker.service.impl;
+package com.klef.soa.docker.service;
 
 import java.util.List;
 
@@ -11,8 +11,6 @@ import com.klef.soa.docker.dto.TutorResponse;
 import com.klef.soa.docker.entity.LanguageTutor;
 import com.klef.soa.docker.exception.ResourceNotFoundException;
 import com.klef.soa.docker.repository.LanguageTutorRepository;
-import com.klef.soa.docker.service.LanguageTutorService;
-
 @Service
 @Transactional
 public class LanguageTutorServiceImpl implements LanguageTutorService {

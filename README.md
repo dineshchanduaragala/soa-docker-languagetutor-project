@@ -43,7 +43,7 @@ The system is decoupled into two primary components communicating over RESTful H
 ### Backend
 | Technology | Version / Purpose |
 | :--- | :--- |
-| **Java JDK** | 21+ (Java SE 21/26 compatible) |
+| **Java JDK** | 21 |
 | **Spring Boot** | 4.1.x Starter Framework |
 | **Spring Data JPA** | Data Access Layer with Hibernate ORM 7.x |
 | **MySQL Connector/J** | JDBC Driver for MySQL 8.x |
@@ -92,10 +92,9 @@ DockerProject/
 │       │   │   │   └── ResourceNotFoundException.java
 │       │   │   ├── repository/                           # Spring Data JPA Repository
 │       │   │   │   └── LanguageTutorRepository.java
-│       │   │   ├── service/                              # Service Interface Layer
+│       │   │   ├── service/                              # Service interface and implementation
 │       │   │   │   ├── LanguageTutorService.java
-│       │   │   │   └── impl/                             # Service Implementation Layer
-│       │   │   │       └── LanguageTutorServiceImpl.java
+│       │   │   │   └── LanguageTutorServiceImpl.java
 │       │   └── resources/
 │       │       └── application.properties                # Spring Boot Config
 │       └── test/
@@ -133,7 +132,7 @@ DockerProject/
 The backend strictly conforms to the required layered architecture under the base package `com.klef.soa.docker`:
 
 1. **`configuration`**:
-   - `CorsConfig`: Enables Cross-Origin Resource Sharing for all HTTP methods (`GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`).
+   - `CorsConfig`: Restricts cross-origin requests to localhost development origins.
    - `SwaggerConfig`: Initializes OpenAPI 3.0 metadata for interactive API exploration.
 2. **`entity`**:
    - `LanguageTutor`: JPA Entity mapped to table `LanguageTutor_table`. Contains primary key generated via `GenerationType.IDENTITY`.
@@ -141,7 +140,7 @@ The backend strictly conforms to the required layered architecture under the bas
    - `LanguageTutorRepository`: Extends `JpaRepository<LanguageTutor, Long>` for out-of-the-box CRUD and query capabilities.
 4. **`service`**:
    - `LanguageTutorService`: Defines contract for tutor management business logic.
-5. **`service.impl`**:
+5. **`service` implementation**:
    - `LanguageTutorServiceImpl`: Implements business operations with Spring `@Transactional` management and repository calls.
 6. **`dto`**:
    - `TutorRequest`: Input payload carrying validation rules (`@NotBlank`, `@DecimalMin`, `@NotNull`, `@Size`).
@@ -249,9 +248,9 @@ When sending invalid or empty data:
 ## 💻 Prerequisites & System Requirements
 
 Ensure the following tools are installed on your machine:
-- **Java JDK**: Version 21 or higher (`java -version`)
+- **Java JDK**: Version 21 (`java -version`)
 - **Maven**: Version 3.8+ or bundled Maven Wrapper (`./mvnw` / `mvnw.cmd`)
-- **Node.js**: Version 18+ or 20+ (`node -v`)
+- **Node.js**: Version 22.12+ (or 20.19+) (`node -v`)
 - **npm**: Version 9+ (`npm -v`)
 - **MySQL Server**: Version 8.0+ running locally on port `3306`
 
@@ -260,16 +259,13 @@ Ensure the following tools are installed on your machine:
 ## 🚀 Local Setup & Running Guide
 
 ### 1. Database Setup
-Make sure your local MySQL instance is running on port `3306`.
-The application automatically creates the database `languagetutor_db` if it does not exist using the JDBC connection string in `LanguageTutorBackend/src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/languagetutor_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=root
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=update
+Make sure your local MySQL instance is running on port `3306` and that your configured database user can create/use `languagetutor_db`. The application creates the database if necessary. Override these environment variables when your local credentials differ:
+```powershell
+$env:SPRING_DATASOURCE_URL = "jdbc:mysql://localhost:3306/languagetutor_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
+$env:SPRING_DATASOURCE_USERNAME = "root"
+$env:SPRING_DATASOURCE_PASSWORD = "your-local-mysql-password"
 ```
-*(If your local MySQL credentials differ, update `username` and `password` in `application.properties`).*
+The backend reads these values from the process environment; credentials are not stored in `application.properties`.
 
 ---
 
@@ -279,12 +275,12 @@ Open a terminal in the `LanguageTutorBackend` directory:
 ```bash
 # Windows Command Prompt / PowerShell:
 cd LanguageTutorBackend
-.\mvnw.cmd clean test-compile
+.\mvnw.cmd -B test
 .\mvnw.cmd spring-boot:run
 
 # Linux / macOS:
 cd LanguageTutorBackend
-./mvnw clean test-compile
+./mvnw -B test
 ./mvnw spring-boot:run
 ```
 
@@ -302,14 +298,14 @@ Open a second terminal in the `LanguageTutorFrontend` directory:
 ```bash
 cd LanguageTutorFrontend
 
-# Install dependencies (if not already installed)
-npm install
+# Install dependencies from the lockfile
+npm ci
 
 # Run the development server
 npm run dev
 ```
 
-The Vite dev server will launch at:
+Vite proxies `/api` requests to the backend on `http://localhost:8080`, so run the backend first. The local frontend routes use hash-based URLs so they work with both the Vite dev server and the static Docker image. The Vite dev server will launch at:
 ```
 http://localhost:5173/
 ```
@@ -321,43 +317,42 @@ Open [http://localhost:5173/](http://localhost:5173/) in your web browser.
 
 Install Docker Desktop (or Docker Engine with the Compose plugin), then run these commands from the project root:
 
-```bash
-docker compose up --build
-```
-
-Compose builds the frontend and backend images, starts MySQL with a persistent `mysql_data` volume, and waits for MySQL to become healthy before starting the backend. Open the app at [http://localhost](http://localhost). The frontend proxies `/api` requests to the backend; the backend is also available directly at `http://localhost:8080`.
-
-The Compose file includes development-only database credential defaults. Override them with environment variables before deployment, for example:
-
 ```powershell
-$env:MYSQL_PASSWORD = "your-local-password"
-$env:MYSQL_ROOT_PASSWORD = "your-local-root-password"
-docker compose up --build
+docker compose pull
+docker compose up -d
 ```
 
-To stop the services while keeping database data, run `docker compose down`. To also delete the database volume, run `docker compose down --volumes`.
+Compose starts the MySQL, backend, and frontend images in the same explicit service/network layout as the class example. Open the UI at [http://localhost:3000](http://localhost:3000); the browser calls the backend at [http://localhost:2025](http://localhost:2025). Port `2025` on the host maps to the Spring Boot container port `8080`; this project does not run its backend on port `2000`. MySQL is available at port `3306`. The frontend image is built with `VITE_API_BASE_URL=http://localhost:2025/api` so its API calls match this host mapping.
+
+The Compose file uses local-development MySQL credentials (`springuser` / `root`, with root password `rooot`), similar to the class demonstration. Replace these before using outside local development. MySQL applies credentials only when its data volume is first initialized; changing the Compose values later does not change credentials in an existing volume.
+
+The GitHub Actions workflow uses the repository secrets `LANGUAGETUTOR_USERNAME` and `LANGUAGETUTOR_TOKEN` (the secret names already configured for this repository). The username secret must be the Docker Hub account that owns the image repositories. Compose defaults to the account `dineshchandu`; if your secret contains a different username, set `LANGUAGETUTOR_USERNAME` in your shell before running Compose so its image names match the images published by Actions.
+
+To stop the services while keeping database data, run `docker compose down`. To also delete the database volume and all tutor records in it, run `docker compose down --volumes` only when you intentionally want to reset the database.
 
 ---
 
 ## ✅ Verification & Testing Checklist
 
-| Step | Verification Task | Result |
-| :---: | :--- | :---: |
-| **01** | **Inspect Project**: Folder structure, dependencies, layered packaging. | **PASSED** |
-| **02** | **Run Backend**: Spring Boot starts on port 8080, connects to MySQL Hikari pool. | **PASSED** |
-| **03** | **Test Backend APIs**: Status check, Swagger UI, display all, add tutor, display by ID, update, delete, and validation errors return HTTP 400. | **PASSED** |
-| **04** | **Run Frontend**: Vite compiles and serves SPA at `http://localhost:5173/` with zero lint errors. | **PASSED** |
-| **05** | **Test End-to-End**: Add records through UI without ID input, display generated IDs, refresh persistence, filter/search, and delete via confirmation modal. | **PASSED** |
-| **06** | **Fix and Recheck**: Layered packages confirmed (`service.impl` implemented), old Docker files removed. | **PASSED** |
-| **07** | **Approve for GitHub**: Root `.gitignore` set up, code clean and documented. | **READY** |
+| Check | Command |
+| :--- | :--- |
+| Frontend lint | `cd LanguageTutorFrontend; npm ci; npm run lint` |
+| Frontend production build | `cd LanguageTutorFrontend; npm run build` |
+| Backend tests (with MySQL running) | `cd LanguageTutorBackend; .\mvnw.cmd -B test` |
+| Compose configuration | `docker compose config --quiet` |
+| Pull the latest published images | `docker compose pull` |
+| Start the stack | `docker compose up -d` |
 
 ---
 
 ## 🔒 Git & Ignore Policies
 
-- Dockerfiles and `.dockerignore` files are maintained for both application services, with `docker-compose.yml` at the project root.
+- Dockerfiles and `.dockerignore` files are maintained for both application services. The demonstration-style `docker-compose.yml` uses the published Docker Hub images and defines the MySQL volume/network.
 - A comprehensive root `.gitignore` is provided to ignore:
   - IDE metadata (`.metadata/`, `.settings/`, `.project`, `.classpath`, `.idea/`, `.vscode/`)
   - Build targets (`target/`, `dist/`, `build/`)
   - Node dependencies (`node_modules/`, debug logs)
+  - Local environment files (`.env*`)
   - Temporary files and OS caches
+- Each service has a `.dockerignore` so generated output, dependencies, IDE files, logs, and local environment files are excluded from Docker build contexts.
+- The Docker workflow builds both service images for pushes to `main` and pull requests targeting `main`. It publishes Docker Hub images only on non-PR runs when `LANGUAGETUTOR_USERNAME` and `LANGUAGETUTOR_TOKEN` are configured as repository secrets.

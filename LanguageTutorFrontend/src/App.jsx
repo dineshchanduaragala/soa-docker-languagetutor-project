@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import AddTutor from './pages/AddTutor.jsx'
 import Dashboard from './pages/Dashboard.jsx'
@@ -8,7 +8,7 @@ import TutorList from './pages/TutorList.jsx'
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Navbar />
       <main className="container app-main py-4 py-lg-5">
         <Routes>
@@ -23,7 +23,7 @@ function App() {
       <footer className="app-footer">
         <div className="container">LanguageTutor · Learn together, one lesson at a time.</div>
       </footer>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

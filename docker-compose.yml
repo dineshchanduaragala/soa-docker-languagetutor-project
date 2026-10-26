@@ -1,49 +1,54 @@
 services:
-  db:
-    image: mysql:8.4
-    restart: unless-stopped
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysql-db
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-languagetutor_db}
-      MYSQL_USER: ${MYSQL_USER:-languagetutor}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-languagetutor}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_ROOT_PASSWORD: rooot
+      MYSQL_DATABASE: languagetutor_db
+      MYSQL_USER: springuser
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --silent",
-        ]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 30s
+    networks:
+      - springboot-mysql-net
 
   backend:
-    build:
-      context: ./LanguageTutorBackend
-    restart: unless-stopped
+    image: ${LANGUAGETUTOR_USERNAME:-dineshchandu}/docker-backend-2400030518:latest
+    container_name: docker-springboot
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-languagetutor_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-languagetutor}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-languagetutor}
-    depends_on:
-      db:
-        condition: service_healthy
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/languagetutor_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: springuser
+      SPRING_DATASOURCE_PASSWORD: root
     ports:
-      - "8080:8080"
+      - "2025:8080"
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - springboot-mysql-net
 
   frontend:
-    build:
-      context: ./LanguageTutorFrontend
-      args:
-        VITE_API_BASE_URL: /api
-    restart: unless-stopped
+    image: ${LANGUAGETUTOR_USERNAME:-dineshchandu}/docker-frontend-2400030518:latest
+    container_name: docker-react
+    ports:
+      - "3000:80"
     depends_on:
       - backend
-    ports:
-      - "80:80"
+    restart: on-failure
+    networks:
+      - springboot-mysql-net
 
 volumes:
   mysql_data:
+
+networks:
+  springboot-mysql-net:
