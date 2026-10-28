@@ -26,14 +26,14 @@ A full-stack, enterprise-grade web application for managing language tutors, con
 ## 🏛 Architecture Overview
 
 The system is decoupled into two primary components communicating over RESTful HTTP APIs:
-- **Backend**: Spring Boot 4 REST API server connected to MySQL via Spring Data JPA and Hibernate.
+- **Backend**: Spring Boot 4 REST API server connected to PostgreSQL via Spring Data JPA and Hibernate.
 - **Frontend**: Single Page Application (SPA) powered by React 19, React Router v7, Vite, and Bootstrap 5.
 
 ```
-┌─────────────────────────────────┐          ┌──────────────────────────────────┐          ┌──────────────────┐
-│   React SPA (Vite + Bootstrap)  │ ──HTTP──> │  Spring Boot REST API (Port 8080) │ ──JDBC──> │   MySQL Database │
-│   http://localhost:5173         │ <──JSON── │  com.klef.soa.docker              │ <──────── │   Port 3306      │
-└─────────────────────────────────┘          └──────────────────────────────────┘          └──────────────────┘
+┌─────────────────────────────────┐          ┌──────────────────────────────────┐          ┌──────────────────────┐
+│   React SPA (Vite + Bootstrap)  │ ──HTTP──> │  Spring Boot REST API (Port 8080) │ ──JDBC──> │  PostgreSQL Database │
+│   http://localhost:5173         │ <──JSON── │  com.klef.soa.docker              │ <──────── │   Port 5432          │
+└─────────────────────────────────┘          └──────────────────────────────────┘          └──────────────────────┘
 ```
 
 ---
@@ -46,7 +46,7 @@ The system is decoupled into two primary components communicating over RESTful H
 | **Java JDK** | 21 |
 | **Spring Boot** | 4.1.x Starter Framework |
 | **Spring Data JPA** | Data Access Layer with Hibernate ORM 7.x |
-| **MySQL Connector/J** | JDBC Driver for MySQL 8.x |
+| **PostgreSQL JDBC Driver** | JDBC Driver for PostgreSQL |
 | **Spring Validation** | Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@DecimalMin`, etc.) |
 | **SpringDoc OpenAPI** | Swagger UI and OpenAPI v3 interactive documentation |
 | **Maven** | Dependency management & Maven Wrapper (`mvnw` / `mvnw.cmd`) |
@@ -252,18 +252,18 @@ Ensure the following tools are installed on your machine:
 - **Maven**: Version 3.8+ or bundled Maven Wrapper (`./mvnw` / `mvnw.cmd`)
 - **Node.js**: Version 22.12+ (or 20.19+) (`node -v`)
 - **npm**: Version 9+ (`npm -v`)
-- **MySQL Server**: Version 8.0+ running locally on port `3306`
+- **PostgreSQL Server**: Version 15+ running locally on port `5432`
 
 ---
 
 ## 🚀 Local Setup & Running Guide
 
 ### 1. Database Setup
-Make sure your local MySQL instance is running on port `3306` and that your configured database user can create/use `languagetutor_db`. The application creates the database if necessary. Override these environment variables when your local credentials differ:
+Make sure your local PostgreSQL instance is running on port `5432` and that the database `languagetutor_db` is created. Override these environment variables when your local credentials differ:
 ```powershell
-$env:SPRING_DATASOURCE_URL = "jdbc:mysql://localhost:3306/languagetutor_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
-$env:SPRING_DATASOURCE_USERNAME = "root"
-$env:SPRING_DATASOURCE_PASSWORD = "your-local-mysql-password"
+$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/languagetutor_db"
+$env:SPRING_DATASOURCE_USERNAME = "postgres"
+$env:SPRING_DATASOURCE_PASSWORD = "your-local-postgres-password"
 ```
 The backend reads these values from the process environment; credentials are not stored in `application.properties`.
 
@@ -322,9 +322,9 @@ docker compose pull
 docker compose up -d
 ```
 
-Compose starts the MySQL, backend, and frontend images in the same explicit service/network layout as the class example. Open the UI at [http://localhost:3000](http://localhost:3000); the browser calls the backend at [http://localhost:2025](http://localhost:2025). Port `2025` on the host maps to the Spring Boot container port `8080`; this project does not run its backend on port `2000`. MySQL is available at port `3306`. The frontend image is built with `VITE_API_BASE_URL=http://localhost:2025/api` so its API calls match this host mapping.
+Compose starts the PostgreSQL, backend, and frontend images in the same explicit service/network layout as the class example. Open the UI at [http://localhost:3000](http://localhost:3000); the browser calls the backend at [http://localhost:2025](http://localhost:2025). Port `2025` on the host maps to the Spring Boot container port `8080`; this project does not run its backend on port `2000`. PostgreSQL is available at port `5432`. The frontend image is built with `VITE_API_BASE_URL=http://localhost:2025/api` so its API calls match this host mapping.
 
-The Compose file uses local-development MySQL credentials (`springuser` / `root`, with root password `rooot`), similar to the class demonstration. Replace these before using outside local development. MySQL applies credentials only when its data volume is first initialized; changing the Compose values later does not change credentials in an existing volume.
+The Compose file uses local-development PostgreSQL credentials (`postgres` / `postgres`, with database `languagetutor_db`). Replace these before using outside local development. PostgreSQL applies credentials only when its data volume is first initialized; changing the Compose values later does not change credentials in an existing volume.
 
 The GitHub Actions workflow uses the repository secrets `LANGUAGETUTOR_USERNAME` and `LANGUAGETUTOR_TOKEN` (the secret names already configured for this repository). The username secret must be the Docker Hub account that owns the image repositories. Compose defaults to the account `dineshchandu`; if your secret contains a different username, set `LANGUAGETUTOR_USERNAME` in your shell before running Compose so its image names match the images published by Actions.
 
@@ -338,7 +338,7 @@ To stop the services while keeping database data, run `docker compose down`. To 
 | :--- | :--- |
 | Frontend lint | `cd LanguageTutorFrontend; npm ci; npm run lint` |
 | Frontend production build | `cd LanguageTutorFrontend; npm run build` |
-| Backend tests (with MySQL running) | `cd LanguageTutorBackend; .\mvnw.cmd -B test` |
+| Backend tests (with PostgreSQL running) | `cd LanguageTutorBackend; .\mvnw.cmd -B test` |
 | Compose configuration | `docker compose config --quiet` |
 | Pull the latest published images | `docker compose pull` |
 | Start the stack | `docker compose up -d` |
@@ -347,7 +347,7 @@ To stop the services while keeping database data, run `docker compose down`. To 
 
 ## 🔒 Git & Ignore Policies
 
-- Dockerfiles and `.dockerignore` files are maintained for both application services. The demonstration-style `docker-compose.yml` uses the published Docker Hub images and defines the MySQL volume/network.
+- Dockerfiles and `.dockerignore` files are maintained for both application services. The demonstration-style `docker-compose.yml` uses the published Docker Hub images and defines the PostgreSQL volume/network.
 - A comprehensive root `.gitignore` is provided to ignore:
   - IDE metadata (`.metadata/`, `.settings/`, `.project`, `.classpath`, `.idea/`, `.vscode/`)
   - Build targets (`target/`, `dist/`, `build/`)

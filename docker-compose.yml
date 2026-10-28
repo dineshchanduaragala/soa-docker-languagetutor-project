@@ -1,43 +1,31 @@
 services:
-  mysqldb:
-    image: mysql:8.0
-    container_name: mysql-db
+  postgresdb:
+    image: postgres:16-alpine
+    container_name: postgres-db
     environment:
-      MYSQL_ROOT_PASSWORD: rooot
-      MYSQL_DATABASE: languagetutor_db
-      MYSQL_USER: springuser
-      MYSQL_PASSWORD: root
+      POSTGRES_DB: languagetutor_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - springboot-mysql-net
+      - springboot-postgres-net
 
   backend:
-    image: ${LANGUAGETUTOR_USERNAME:-dineshchandu}/docker-backend-2400030518:latest
+    image: dineshchandu/docker-backend-2400030518:latest
     container_name: docker-springboot
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/languagetutor_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: springuser
-      SPRING_DATASOURCE_PASSWORD: root
     ports:
       - "2025:8080"
     depends_on:
-      mysqldb:
-        condition: service_healthy
+      postgresdb:
     restart: on-failure
     networks:
-      - springboot-mysql-net
+      - springboot-postgres-net
 
   frontend:
-    image: ${LANGUAGETUTOR_USERNAME:-dineshchandu}/docker-frontend-2400030518:latest
+    image: dineshchandu/docker-frontend-2400030518:latest
     container_name: docker-react
     ports:
       - "3000:80"
@@ -45,10 +33,9 @@ services:
       - backend
     restart: on-failure
     networks:
-      - springboot-mysql-net
-
+      - springboot-postgres-net
 volumes:
-  mysql_data:
+  postgres_data:
 
 networks:
-  springboot-mysql-net:
+  springboot-postgres-net:
