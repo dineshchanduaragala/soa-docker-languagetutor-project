@@ -1,3 +1,4 @@
+
 services:
   postgresdb:
     image: postgres:16-alpine
@@ -18,8 +19,12 @@ services:
     container_name: docker-springboot
     ports:
       - "2025:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/languagetutor_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
-      postgresdb:
+      - postgresdb
     restart: on-failure
     networks:
       - springboot-postgres-net
@@ -34,6 +39,7 @@ services:
     restart: on-failure
     networks:
       - springboot-postgres-net
+
 volumes:
   postgres_data:
 
